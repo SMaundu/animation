@@ -1,0 +1,57 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true
+  },
+  "files.associations": {
+    "*.dart": "dart"
+  },
+  "emmet.includeLanguages": {
+    "dart": "html"
+  },
+  "dart.flutterSdkPath": "",
+  "dart.checkForSdkUpdates": true,
+  "dart.previewFlutterUiGuides": true,
+  "dart.previewFlutterUiGuidesCustomTracking": true,
+  "dart.hotReloadOnSave": "always",
+  "dart.showIgnoreQuickFixes": false,
+  "dart.warnWhenEditingFilesOutsideWorkspace": false,
+  "editor.rulers": [80, 120],
+  "editor.wordWrap": "wordWrapColumn",
+  "editor.wordWrapColumn": 80,
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/build": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/Thumbs.db": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/build": true,
+    "**/.git": true,
+    "**/coverage": true,
+    "**/dist": true,
+    "**/.nyc_output": true
+  },
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "javascript.preferences.includePackageJsonAutoImports": "auto",
+  "javascript.suggest.autoImports": true,
+  "typescript.suggest.autoImports": true,
+  "emmet.syntaxProfiles": {
+    "javascript": "jsx"
+  },
+  "explorer.confirmDragAndDrop": false,
+  "explorer.confirmDelete": false,
+  "terminal.integrated.defaultProfile.windows": "Command Prompt",
+  "terminal.integrated.profiles.windows": {
+    "Command Prompt": {
+      "path": "cmd.exe",
+      "icon": "terminal-cmd"
+    },
+    "PowerShell": {
+      "path": "powershell.exe",
+      "icon": "terminal-powershell"
+    }
+  }
+}
