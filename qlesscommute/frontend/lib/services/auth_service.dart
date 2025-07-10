@@ -1,103 +1,49 @@
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import 'api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const String _userKey = 'user_data';
   static const String _tokenKey = 'auth_token';
+  static const String _userKey = 'user_data';
 
-  // Register new user
-  static Future<ApiResponse<AuthResult>> register({
-    required String name,
-    required String phone,
-    required String password,
+  // Login user
+  static Future<ApiResponse<User>> login(String phoneNumber, String password) async {
+    return await ApiService.post<User>(
+      '/auth/login',
+      {
+        'phoneNumber': phoneNumber,
+        'password': password,
+      },
+      (data) => User.fromJson(data['user']),
+      saveToken: true,
+    );
+  }
+
+  // Register user
+  static Future<ApiResponse<User>> register(
+    String name,
+    String phoneNumber,
+    String password, {
     String role = 'passenger',
   }) async {
-    final response = await ApiService.post<AuthResult>(
-      '/register',
+    return await ApiService.post<User>(
+      '/auth/register',
       {
         'name': name,
-        'phone': phone,
+        'phoneNumber': phoneNumber,
         'password': password,
         'role': role,
       },
-      AuthResult.fromJson,
-      requireAuth: false,
-    );
-
-    if (response.isSuccess && response.data != null) {
-      // Save user data and token
-      await _saveUserData(response.data!.user);
-      await ApiService.saveAuthToken(response.data!.token);
-    }
-
-    return response;
-  }
-
-  // Login user
-  static Future<ApiResponse<AuthResult>> login({
-    required String phone,
-    required String password,
-  }) async {
-    final response = await ApiService.post<AuthResult>(
-      '/login',
-      {
-        'phone': phone,
-        'password': password,
-      },
-      AuthResult.fromJson,
-      requireAuth: false,
-    );
-
-    if (response.isSuccess && response.data != null) {
-      // Save user data and token
-      await _saveUserData(response.data!.user);
-      await ApiService.saveAuthToken(response.data!.token);
-    }
-
-    return response;
-  }
-
-  // Verify token
-  static Future<ApiResponse<User>> verifyToken() async {
-    final response = await ApiService.get<User>(
-      '/verify',
       (data) => User.fromJson(data['user']),
-    );
-
-    if (response.isSuccess && response.data != null) {
-      // Update stored user data
-      await _saveUserData(response.data!);
-    }
-
-    return response;
-  }
-
-  // Change password
-  static Future<ApiResponse<Map<String, dynamic>>> changePassword({
-    required String currentPassword,
-    required String newPassword,
-  }) async {
-    return await ApiService.post<Map<String, dynamic>>(
-      '/change-password',
-      {
-        'currentPassword': currentPassword,
-        'newPassword': newPassword,
-      },
-      (data) => data,
+      saveToken: true,
     );
   }
 
-  // Logout
+  // Logout user
   static Future<void> logout() async {
-    await _clearUserData();
-    await ApiService.clearAuthToken();
-  }
-
-  // Check if user is logged in
-  static Future<bool> isLoggedIn() async {
-    final token = await ApiService.getAuthToken();
-    return token != null && token.isNotEmpty;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_tokenKey);
+    await prefs.remove(_userKey);
   }
 
   // Get current user
@@ -106,71 +52,39 @@ class AuthService {
     final userData = prefs.getString(_userKey);
     
     if (userData != null) {
-      try {
-        final userMap = Map<String, dynamic>.from(
-          await ApiService.get<Map<String, dynamic>>(
-            '/verify',
-            (data) => data,
-          ).then((response) => response.data ?? {}),
-        );
-        return User.fromJson(userMap['user'] ?? {});
-      } catch (e) {
-        // If there's an error, return null and let the app handle re-authentication
-        return null;
-      }
+      final userMap = User.fromStoredJson(userData);
+      return userMap;
     }
     
     return null;
   }
 
-  // Save user data locally
-  static Future<void> _saveUserData(User user) async {
+  // Check if user is logged in
+  static Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_userKey, user.toJson().toString());
+    final token = prefs.getString(_tokenKey);
+    return token != null;
   }
 
-  // Clear user data locally
-  static Future<void> _clearUserData() async {
+  // Get stored token
+  static Future<String?> getToken() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_userKey);
+    return prefs.getString(_tokenKey);
   }
 
-  // Check authentication status and auto-login if token exists
-  static Future<AuthStatus> checkAuthStatus() async {
-    try {
-      final token = await ApiService.getAuthToken();
-      
-      if (token == null || token.isEmpty) {
-        return AuthStatus.unauthenticated;
-      }
-
-      // Verify token with server
-      final verifyResponse = await verifyToken();
-      
-      if (verifyResponse.isSuccess) {
-        return AuthStatus.authenticated;
-      } else {
-        // Token is invalid, clear it
-        await logout();
-        return AuthStatus.unauthenticated;
-      }
-    } catch (e) {
-      // If there's any error, assume unauthenticated
-      await logout();
-      return AuthStatus.unauthenticated;
-    }
-  }
-
-  // Validate phone number format
+  // Phone number validation
   static bool isValidPhoneNumber(String phone) {
-    // Kenyan phone number formats: 0712345678 or 254712345678
-    final phoneRegex = RegExp(r'^(254|0)[7-9]\d{8}$');
+    // Remove any non-digit characters
+    phone = phone.replaceAll(RegExp(r'[^\d]'), '');
+    
+    // Check if it's a valid Kenyan phone number
+    final phoneRegex = RegExp(r'^(0[7-9]\d{8}|254[7-9]\d{8}|\d{9})$');
     return phoneRegex.hasMatch(phone);
   }
 
-  // Format phone number
+  // Format phone number to international format
   static String formatPhoneNumber(String phone) {
-    // Remove any spaces or special characters
+    // Remove any non-digit characters
     phone = phone.replaceAll(RegExp(r'[^\d]'), '');
     
     // Convert to international format
@@ -185,7 +99,7 @@ class AuthService {
     return phone;
   }
 
-  // Validate password strength
+  // Password validation
   static bool isValidPassword(String password) {
     return password.length >= 6;
   }
@@ -193,53 +107,75 @@ class AuthService {
   // Get password strength message
   static String getPasswordStrengthMessage(String password) {
     if (password.isEmpty) {
-      return 'Password is required';
-    }
-    
-    if (password.length < 6) {
-      return 'Password must be at least 6 characters long';
-    }
-    
-    if (password.length < 8) {
+      return 'Enter a password';
+    } else if (password.length < 6) {
+      return 'Password must be at least 6 characters';
+    } else if (password.length < 8) {
+      return 'Good password';
+    } else if (password.length >= 8 && _hasSpecialCharacter(password)) {
+      return 'Strong password';
+    } else {
       return 'Good password';
     }
-    
-    if (password.contains(RegExp(r'[A-Z]')) && 
-        password.contains(RegExp(r'[a-z]')) && 
-        password.contains(RegExp(r'[0-9]'))) {
-      return 'Strong password';
-    }
-    
-    return 'Good password';
   }
-}
 
-class AuthResult {
-  final User user;
-  final String token;
+  static bool _hasSpecialCharacter(String password) {
+    final specialCharRegex = RegExp(r'[!@#$%^&*(),.?":{}|<>]');
+    final numberRegex = RegExp(r'[0-9]');
+    final upperCaseRegex = RegExp(r'[A-Z]');
+    
+    return specialCharRegex.hasMatch(password) ||
+           numberRegex.hasMatch(password) ||
+           upperCaseRegex.hasMatch(password);
+  }
 
-  AuthResult({
-    required this.user,
-    required this.token,
-  });
-
-  factory AuthResult.fromJson(Map<String, dynamic> json) {
-    return AuthResult(
-      user: User.fromJson(json['user']),
-      token: json['token'],
+  // Refresh token
+  static Future<ApiResponse<String>> refreshToken() async {
+    return await ApiService.post<String>(
+      '/auth/refresh',
+      {},
+      (data) => data['token'],
+      saveToken: true,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'user': user.toJson(),
-      'token': token,
-    };
-  }
-}
+  // Update user profile
+  static Future<ApiResponse<User>> updateProfile({
+    String? name,
+    String? phoneNumber,
+  }) async {
+    final Map<String, dynamic> data = {};
+    if (name != null) data['name'] = name;
+    if (phoneNumber != null) data['phoneNumber'] = phoneNumber;
 
-enum AuthStatus {
-  authenticated,
-  unauthenticated,
-  loading,
+    return await ApiService.patch<User>(
+      '/auth/profile',
+      data,
+      (data) => User.fromJson(data['user']),
+    );
+  }
+
+  // Change password
+  static Future<ApiResponse<Map<String, dynamic>>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) async {
+    return await ApiService.patch<Map<String, dynamic>>(
+      '/auth/change-password',
+      {
+        'currentPassword': currentPassword,
+        'newPassword': newPassword,
+      },
+      (data) => data,
+    );
+  }
+
+  // Delete account
+  static Future<ApiResponse<Map<String, dynamic>>> deleteAccount(String password) async {
+    return await ApiService.delete<Map<String, dynamic>>(
+      '/auth/delete-account',
+      {'password': password},
+      (data) => data,
+    );
+  }
 }
