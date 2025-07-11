@@ -93,6 +93,7 @@ flutter run
 For comprehensive setup instructions, troubleshooting, and development workflow:
 
 👉 **[VS Code Setup Guide](VSCODE_SETUP.md)** - Complete setup instructions
+👉 **[Asset Fix Guide](ASSET_FIX.md)** - Fix Flutter compilation errors
 
 ## 🔧 Development Features
 
