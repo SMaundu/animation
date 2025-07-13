@@ -1,0 +1,104 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Flutter (Debug)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/frontend",
+      "program": "lib/main.dart",
+      "args": ["--debug"]
+    },
+    {
+      "name": "Flutter (Profile)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/frontend",
+      "program": "lib/main.dart",
+      "flutterMode": "profile"
+    },
+    {
+      "name": "Flutter (Release)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/frontend",
+      "program": "lib/main.dart",
+      "flutterMode": "release"
+    },
+    {
+      "name": "Flutter Web (Debug)",
+      "request": "launch",
+      "type": "dart",
+      "cwd": "${workspaceFolder}/frontend",
+      "program": "lib/main.dart",
+      "args": ["-d", "web-server", "--web-port", "3001"],
+      "flutterMode": "debug"
+    },
+    {
+      "name": "Backend (Debug)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/server.js",
+      "cwd": "${workspaceFolder}/backend",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "restart": true,
+      "runtimeArgs": ["--inspect"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Backend (Nodemon)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/server.js",
+      "cwd": "${workspaceFolder}/backend",
+      "env": {
+        "NODE_ENV": "development"
+      },
+      "console": "integratedTerminal",
+      "restart": true,
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["nodemon"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    },
+    {
+      "name": "Backend (Production)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/backend/server.js",
+      "cwd": "${workspaceFolder}/backend",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Full Stack (Debug)",
+      "configurations": [
+        "Backend (Nodemon)",
+        "Flutter (Debug)"
+      ],
+      "stopAll": true,
+      "preLaunchTask": "Setup Project"
+    },
+    {
+      "name": "Launch Full Stack (Web)",
+      "configurations": [
+        "Backend (Debug)",
+        "Flutter Web (Debug)"
+      ],
+      "stopAll": true
+    }
+  ]
+}

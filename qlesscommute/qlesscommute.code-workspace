@@ -1,0 +1,96 @@
+{
+  "folders": [
+    {
+      "name": "🎯 QLessCommute (Root)",
+      "path": "."
+    },
+    {
+      "name": "🚀 Backend (Node.js)",
+      "path": "./backend"
+    },
+    {
+      "name": "📱 Frontend (Flutter)",
+      "path": "./frontend"
+    }
+  ],
+  "settings": {
+    "dart.flutterSdkPath": "",
+    "dart.checkForSdkUpdates": true,
+    "dart.previewFlutterUiGuides": true,
+    "dart.hotReloadOnSave": "always",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": true
+    },
+    "files.associations": {
+      "*.dart": "dart",
+      "*.env": "dotenv"
+    },
+    "search.exclude": {
+      "**/node_modules": true,
+      "**/build": true,
+      "**/.dart_tool": true,
+      "**/.git": true,
+      "**/coverage": true
+    },
+    "files.exclude": {
+      "**/node_modules": true,
+      "**/build": true,
+      "**/.dart_tool": true,
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/Thumbs.db": true
+    },
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "*.dart": "${capture}.g.dart,${capture}.freezed.dart",
+      "pubspec.yaml": "pubspec.lock,.flutter-plugins,.flutter-plugins-dependencies,.packages",
+      "package.json": "package-lock.json,yarn.lock,pnpm-lock.yaml",
+      ".env": ".env.*"
+    }
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "🏗️ Setup Full Project",
+        "dependsOrder": "sequence",
+        "dependsOn": [
+          "Install Backend Dependencies",
+          "Install Flutter Dependencies"
+        ],
+        "group": "build"
+      }
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [],
+    "compounds": [
+      {
+        "name": "🚀 Launch Full Stack",
+        "configurations": [
+          "Backend (Nodemon)",
+          "Flutter (Debug)"
+        ]
+      }
+    ]
+  },
+  "extensions": {
+    "recommendations": [
+      "dart-code.flutter",
+      "dart-code.dart-code",
+      "rangav.vscode-thunder-client",
+      "cweijan.vscode-mysql-client2",
+      "esbenp.prettier-vscode",
+      "usernamehw.errorlens",
+      "ms-vscode.vscode-json",
+      "bradlc.vscode-tailwindcss",
+      "formulahendry.auto-rename-tag",
+      "christian-kohler.path-intellisense",
+      "oderwat.indent-rainbow",
+      "ms-vscode.live-server"
+    ]
+  }
+}
